@@ -86,7 +86,7 @@ Since we can not create a symbolic link but links no file, so the file size of t
 
 > Write a utility like cp(1) that copies a file containing holes, without writing the bytes of 0 to the output file.
 
-We wrote three files:
+We wrote three files([click here](https://github.com/fatsheep9146/APUE-answers/tree/master/Chapter04/Exercise_04_06)):
 
 * **file\_with\_hole.c**: this c file create a file with hole in it called '1.txt'
 * **cp.c**: this file is the answer to the question, which can copy the valid content(the character which is not '\0') of file with hole into another file. Assume the new file called **3.txt**
@@ -120,3 +120,30 @@ And the umask is `002`. So the core's mode is certainly `rw-r--r--`.
 But the **core.copy** is created by system. The system's default file mode is decided by umask, first the new file's mode is rw-rw-rw before combined with umask(System do not allow to add the execution right 'x' when creating file).
 umask is now '002'. So after combined, the new file's mode is changed into 'rw-rw-r--'.
 
+
+### Exercise 4.8
+
+> When running the program in Figure 4.16, we check the available disk space with the df(1) command. Why didn’t we use the du(1) command?
+
+According to the following explinations:
+
+> **df**  will read the meta data of the disk partition containing the specified folder which in your case is app1 and return the disk partition information rather than that of the actual directory.
+
+> **du**  will runs through the directory tree specified and counts the sum size of all the files under the directory and return the total space occupied by that directory.
+
+We can see that, although these two commands both can know the data file size on the disk, but the **du** should use the directory file to find the data files, but **df** do not have to. So after the program in figure 4-16 unlinked the file
+the directory entry for the **tempfile** are deleted, so if we use **du** to check the size of all the files in current directory, the **tempfile** will not be included, so the results of two `du -sh` commands executed **before** "done" is printed on the console and **after** "done" is printed on the console are same. 
+
+### Exercise 4.9
+
+> In Figure 4.20, we show the unlink function as modifying the changed-status time of the file itself. How can this happen?
+
+Because **unlink** will change the **link count** of this file, which is a information that stored in the **inode** of this file, so the **st_ctim** will be changed, too.
+
+### Exercise 4.10 
+
+> In Section 4.22, how does the system’s limit on the number of open files affect the myftw function?
+
+In the function **dopath**, the **opendir** will be called recursively, if we use opendir to open a directory file, then a file descriptor will be created, and unless we finished visitting of all the subfiles of this directory, the directory file can be closed. So the system's limit on the number of open files will limit the maximum depth of directory hierarchy we scan.
+
+  
