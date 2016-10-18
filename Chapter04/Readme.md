@@ -147,3 +147,33 @@ Because **unlink** will change the **link count** of this file, which is a infor
 In the function **dopath**, the **opendir** will be called recursively, if we use opendir to open a directory file, then a file descriptor will be created, and unless we finished visitting of all the subfiles of this directory, the directory file can be closed. So the system's limit on the number of open files will limit the maximum depth of directory hierarchy we scan.
 
   
+### Exercise 4.12 
+
+> Each process also has a root directory that is used for resolution of absolute pathnames. This root directory can be changed with the chroot function. Look up the description for this function in your manuals. When might this function be useful?
+
+Since chroot function can create a new root directory for command, system can create so-called "chroot jail" for users which enter the system. The chroot can limit the files that user can visit, user can only visit the files under the new chrooted root directory. By doing this, the system is well protected.
+
+### Exercise 4.13
+
+> How can you set only one of the two time values with the utimes function?
+
+Note that, the second parameters for **futimens** and **utimes** are not same. In  **futimens** are 
+	
+	struct timespec{
+		time_t tv_sec;
+ 		long tv_nsec;  // Note that, the unit is nanosecond
+	};   
+
+In **utimes** are
+
+	struct timeval {
+		time_t tv_sec;
+		long tv_usec;  // Note that, the unit it microsecond
+	};
+
+So if we want to set only one of the two times, we should first use **stat** to obtain original time values, after the file is visitted or modified, we could use the original time values we just got to restore the time value which we want. 
+
+The program in the **main.c**, is after we modify one file, we remain the file's access time unchanged, but modified time changed.
+
+
+ 
