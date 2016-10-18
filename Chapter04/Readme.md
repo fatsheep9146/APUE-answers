@@ -173,7 +173,52 @@ In **utimes** are
 
 So if we want to set only one of the two times, we should first use **stat** to obtain original time values, after the file is visitted or modified, we could use the original time values we just got to restore the time value which we want. 
 
-The program in the **main.c**, is after we modify one file, we remain the file's access time unchanged, but modified time changed.
+The program in the **main.c**([click here](https://github.com/fatsheep9146/APUE-answers/tree/master/Chapter04/Exercise_04_13)):, is after we modify one file, we remain the file's access time unchanged, but modified time changed.
 
+### Exercise 4.15
 
+> Examine the archive formats used by the cpio(1) and tar(1) commands. (These
+descriptions are usually found in Section 5 of the UNIX Programmer ’s Manual.) How many of the three possible time values are saved for each file? When a file is restored, what value do you think the access time is set to, and why?
  
+For **cpio**, the command is used to copy a bunch of files into or out of archive, it always be used with **find** command, for example, copy all regular files under current directory into one archive called **regur.cpio**, we use following command
+
+	$ find . -type f | cpio -ov > regur.cpio
+
+In this case, the command will visit each file in current directory and collect them into one archive, so in this case, the access time of all regular files will be updated to current time. But modification time will not change. But after my experiment, I found the status change time also be changed, I have no ideas why this happen. 
+
+If we do not want to change the access time, we can use option `-a`. The access time will not be changed.
+
+If the file is restored, since we create new files, the access time, modification time and status change time will be different from original times. But we can use `-m` option to reset the access time and modification time to the previous modification time.
+
+For **tar**, in the default situation, the tared files's access time will be updated to the current time. Other two times remained unchanged. Of course, we can use `--atime-preserve` option to prevent this change.
+
+When the files are extracted, the access time, status change time must be current time, but the modification time is default to be original modification time. But
+we can use `-m` option to update modification time to current time.
+
+### Exercise 4.16
+
+> Does the UNIX System have a fundamental limitation on the depth of a directory tree? To find out, write a program that creates a directory and then changes to that directory, in a loop. Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s PATH_MAX limit. Can you call getcwd to fetch the directory’s pathname? How do the standard UNIX System tools deal with this long pathname? Can you archive the directory using either tar or cpio?  
+
+
+
+We wrote the program **gen_dir.c**([click here](https://github.com/fatsheep9146/APUE-answers/tree/master/Chapter04/Exercise_04_16)): to generate a directory tree with any depth we want and any directory name we want, for example
+
+	& ./gendir dir 2
+
+This will create a directory tree like `./dir/dir` in the current directory. And we found that if we set a big number for depth, the directory tree can be built successfully.
+
+And if we input a really long name and really big depth, then the length of absolute path may be larger than PATH_MAX. So I create file **gen_big_dir.c**,([click here](https://github.com/fatsheep9146/APUE-answers/tree/master/Chapter04/Exercise_04_16)): which created a really big directory tree. And in the there is leaf node **file1.txt** in the most inside directory.
+
+In my machine, the PATH_MAX is 4096 byte, but the absolute path of **file1.txt** is bigger than 7000, so we must allocate a big enough array to store the path. We found that, the **getcwd** can get the right absolute path of **file1.txt**, which is 
+
+	/home/zzq/longlong...long1/longlong...long2/longlong...long3/...../longlong...long30
+
+We omit the repeated long in the above string by ellipsis. So this means that getcwd works successfully.
+
+But if the length of absolute path of the file is too long, there may be problem.  We can not use **rm** with the abosule path of **file1.txt**, since we can only list 4096 bytes of path name in the **rm**, so in my machine, I can only type until it becomes as follow:
+
+	$rm -r /home/zzq/longlong...long1/longlong..long2/..../longlong...long15
+
+And at this time, I can not continue.
+
+Of course the cpio and tar can not work on this directory tree, either.    
