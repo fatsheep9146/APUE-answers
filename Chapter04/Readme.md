@@ -221,4 +221,18 @@ But if the length of absolute path of the file is too long, there may be problem
 
 And at this time, I can not continue.
 
-Of course the cpio and tar can not work on this directory tree, either.    
+Of course the cpio and tar can not work on this directory tree, either.   
+
+### Exercise 4.17 
+
+> In Section 3.16, we described the /dev/fd feature. For any user to be able to access these files, their permissions must be rw-rw-rw-. Some programs that create an output file delete the file first, in case it already exists, ignoring the return code:
+
+> unlink(path);
+   
+> if ((fd = creat(path, FILE_MODE)) < 0) err\_sys(...);
+
+> What happens if path is /dev/fd/1?
+
+The unlink funtion will fail, and return -1. The errno will be set to **EPERM**, which means operation is not permitted.
+
+ 
