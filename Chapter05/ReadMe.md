@@ -50,3 +50,33 @@ So if the return value is zero, it means that the **printg** output the empty st
 
 I have no idea...
 
+### Exercise 5.5
+
+> How would you use the fsync function (Section 3.13) with a standard I/O stream?
+
+You should first call the funtion **fflush** to clear the buffer in order to call system call **write**. And then call **fsync** to write the data into disk.
+
+### Exercise 5.6
+
+> In the programs in Figures 1.7 and 1.10, the prompt that is printed does not contain a newline, and we don’t call fflush. What causes the prompt to be output?
+
+The program in Figure 1.7 and 1.10 both have stdin as their input, stdout as their output. Section 5.4 said that:
+
+> Line buffering is typically used on a stream when it refers to a terminal—standard input and standard output, for example.
+
+So we can infer that,  the stdin and stdout is line buffering. Then section 5.4 also said that:
+
+> Second, whenever input is requested through the standard I/O library from either (a) an unbuffered stream or (b) a line-buffered stream (that requires data to be requested from the kernel), all line-buffered output streams are flushed.
+
+Since in the programs of Figure 1.7 and 1.10, the statements
+
+	printf("%% ");
+
+which control stdout output stream, are all followed by the statement 
+
+	fgets(buf, MAXLINE, stdin)
+
+control stdin input stream, in which case is just like above discussion. output streams will be flushed by the input streams.
+
+So the prompt will be shown on the screen.
+
